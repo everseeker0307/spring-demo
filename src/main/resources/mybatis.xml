@@ -7,7 +7,7 @@
     <!--配置实体类的别名-->
     <typeAliases>
         <!--使用package，为包下面的所有类设置别名，默认规则为com.everSeeker.entity.User设置为User，去除前面的包名。-->
-        <package name="com.everSeeker.entity" />
+        <package name="com.everseeker.entity" />
     </typeAliases>
 
 </configuration>

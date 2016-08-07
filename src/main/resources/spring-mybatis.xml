@@ -66,7 +66,7 @@
         <!--basePackage指定要扫描的包，在此包之下的映射器都会被搜索到。可指定多个包，包与包之间用逗号或分号分隔
             MapperScannerConfigurer将扫描basePackage所指定包下的所有接口类(包括子包)，如果他们在SQL映射文件
             中定义过，则将他们动态定义为一个Spring Bean. -->
-        <property name="basePackage" value="com.everSeeker.dao" />
+        <property name="basePackage" value="com.everseeker.dao" />
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
     </bean>
 

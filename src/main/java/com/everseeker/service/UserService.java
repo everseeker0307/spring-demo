@@ -1,16 +1,12 @@
-package com.everseeker.dao;
+package com.everseeker.service;
 
 import com.everseeker.entity.User;
-import org.springframework.stereotype.Repository;
 
 /**
  * Created by everseeker on 16/8/7.
  */
-@Repository("userDao")
-public interface UserDao {
+public interface UserService {
     void addUser(User user);
 
     User getUserByUsername(String username);
 }
-
-
