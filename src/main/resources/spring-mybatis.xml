@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 在该文件中引入db.properties文件，可以保证之后的配置比如${db.mysql.driverClass}肯定能找到对应的值 -->
+    <!-- 否则，如果直接在RootConfig.java中同事载入db.properties以及spring-mybatis.xml的话，不能保证db.properties先被引入，从而导致程序报错 -->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!--数据源配置 c3p0
+        常见的数据源实现类包有2个，一个是apache的DBCP(org.apache.commons.dbcp.BasicDataSource)，另一个为C3P0。
+    -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close">
+
+        <property name="driverClass" value="${db.mysql.driverClass}" />
+        <property name="jdbcUrl" value="${db.mysql.jdbcUrl}" />
+        <property name="user" value="${db.mysql.user}" />
+        <property name="password" value="${db.mysql.password}" />
+
+        <!--连接池中保留的最小连接数。 -->
+        <property name="minPoolSize" value="${db.minPoolSize}" />
+
+        <!--连接池中保留的最大连接数。Default: 15 -->
+        <property name="maxPoolSize" value="${db.maxPoolSize}" />
+
+        <!--初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 -->
+        <property name="initialPoolSize" value="${db.initialPoolSize}" />
+
+        <!--最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
+        <property name="maxIdleTime" value="${db.maxIdleTime}" />
+
+        <!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
+        <property name="acquireIncrement" value="${db.acquireIncrement}" />
+
+        <!--JDBC的标准参数，用以控制数据源内加载的PreparedStatements数量。但由于预缓存的statements 属于单个connection而不是整个连接池。所以设置这个参数需要考虑到多方面的因素。
+            如果maxStatements与maxStatementsPerConnection均为0，则缓存被关闭。Default: 0 -->
+        <property name="maxStatements" value="${db.maxStatements}" />
+
+        <!--每60秒检查所有连接池中的空闲连接。Default: 0 -->
+        <property name="idleConnectionTestPeriod" value="${db.idleConnectionTestPeriod}" />
+
+        <!--定义在从数据库获取新连接失败后重复尝试的次数。Default: 30 -->
+        <property name="acquireRetryAttempts" value="${db.acquireRetryAttempts}" />
+
+        <!--获取连接失败将会引起所有等待连接池来获取连接的线程抛出异常。但是数据源仍有效 保留，并在下次调用getConnection()的时候继续尝试获取连接。如果设为true，那么在尝试
+            获取连接失败后该数据源将申明已断开并永久关闭。Default: false -->
+        <property name="breakAfterAcquireFailure" value="${db.breakAfterAcquireFailure}" />
+
+        <!--因性能消耗大请只在需要的时候使用它。如果设为true那么在每个connection提交的 时候都将校验其有效性。建议使用idleConnectionTestPeriod或automaticTestTable
+            等方法来提升连接测试的性能。Default: false -->
+        <property name="testConnectionOnCheckout" value="${db.testConnectionOnCheckout}" />
+    </bean>
+
+    <!-- myBatis配置.
+         classpath和classpath*的区别，参考文档：http://blog.csdn.net/zl3450341/article/details/9306983.
+         classpath只会返回第一个匹配的资源，建议确定路径的单个文档使用classpath；匹配多个文档时使用classpath*.
+    -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+          p:dataSource-ref="dataSource"
+          p:configLocation="classpath:mybatis.xml"
+          p:mapperLocations="classpath*:mapper/*Mapper.xml" />
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--basePackage指定要扫描的包，在此包之下的映射器都会被搜索到。可指定多个包，包与包之间用逗号或分号分隔
+            MapperScannerConfigurer将扫描basePackage所指定包下的所有接口类(包括子包)，如果他们在SQL映射文件
+            中定义过，则将他们动态定义为一个Spring Bean. -->
+        <property name="basePackage" value="com.everSeeker.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+
+    <!-- 事务管理器配置, 使用jdbc事务 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 使用annotation定义事务，对标注了@Transactional注解的bean进行处理，以织入事务管理切面.
+        默认情况下，自动使用名称为transactionManager的事务管理器。
+        proxy-target-class为true，表示spring将通过创建子类来代理业务类，需要在类路径中添加CGLib.jar类库。-->
+    <tx:annotation-driven transaction-manager="transactionManager"
+                          proxy-target-class="true" />
+</beans>

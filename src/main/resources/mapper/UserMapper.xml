@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.everSeeker.dao.UserDao">
+    <resultMap id="ResultMapUser" type="com.everSeeker.entity.User">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="email" property="email" />
+        <result column="reg_date" property="regDate" />
+        <result column="state" property="state" />
+    </resultMap>
+
+    <insert id="addUser" parameterType="User">
+        insert into user(id, username, password, email, reg_date, state) values(#{id}, #{username}, #{password}, #{email}, #{regDate}, #{state})
+    </insert>
+
+    <select id="getUserByUsername" parameterType="String" resultMap="ResultMapUser">
+        select * from user where username=#{username}
+    </select>
+
+</mapper>
