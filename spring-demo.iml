@@ -4,9 +4,8 @@
     <facet type="Spring" name="Spring">
       <configuration>
         <fileset id="fileset" name="Spring Application Context" removed="false">
+          <file>file://$MODULE_DIR$/src/main/resources/spring-mybatis.xml</file>
           <file>file://$MODULE_DIR$/src/main/java/com/everseeker/config/RootConfig.java</file>
-          <file>jar://$MAVEN_REPOSITORY$/org/glassfish/jersey/ext/jersey-spring3/2.22.2/jersey-spring3-2.22.2.jar!/jersey-spring-applicationContext.xml</file>
-          <file>file://$MAVEN_REPOSITORY$/org/glassfish/jersey/ext/jersey-spring3/2.22.2/jersey-spring3-2.22.2.jar</file>
         </fileset>
       </configuration>
     </facet>
@@ -101,5 +100,9 @@
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-xc:1.9.2" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-core:1.19.1" level="project" />
     <orderEntry type="library" name="Maven: javax.ws.rs:jsr311-api:1.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.7.21" level="project" />
+    <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:jcl-over-slf4j:1.7.21" level="project" />
   </component>
 </module>

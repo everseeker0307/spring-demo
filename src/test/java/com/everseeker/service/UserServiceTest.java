@@ -5,6 +5,7 @@ import com.everseeker.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -19,8 +20,9 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
+    @Rollback   //注: @Roolback是针对事务的, 对非事务性方法不起作用
     public void addUserTest() {
-        User user = new User("abc", "1234", "abc@123.com");
+        User user = new User("www", "987", "www@189.cn");
         userService.addUser(user);
     }
 
