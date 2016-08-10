@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/rabbit"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/rabbit
+                http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+              http://www.springframework.org/schema/beans
+              http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--1、配置连接工厂, 如果不配置host, port, username, passowrd, 则按默认值localhost:5672, guest/guest-->
+    <!--<connection-factory id="connectionFactory" />-->
+    <connection-factory id="connectionFactory"
+                        host="localhost"
+                        port="5672"
+                        username="everseeker"
+                        password="333" />
+
+    <!--2、配置队列queue, Exchange, 以及将他们结合在一起的binding-->
+    <!--在queue以及exchange中, 有一个重要的属性durable, 默认为true, 可以防止宕机后数据丢失。-->
+    <!--在listener-container中, 有acknowledge属性, 默认为auto, 即消费者成功处理消息后必须有个应答, 如果消费者程序发生异常或者宕机, 消息会被重新放回队列-->
+    <admin connection-factory="connectionFactory" />
+    <queue id="userAlertEmailQueue" name="user.alerts.email" durable="true" />  <!--durable默认为true-->
+
+    <!--标准的AMQP Exchange有4种: Direct, Topic, Headers, Fanout, 根据实际需要选择。-->
+    <!--Direct: 如果消息的routing key与bingding的routing key直接匹配的话, 消息将会路由到该队列上。-->
+    <!--Topic: 如果消息的routing key与bingding的routing key符合通配符匹配的话, 消息将会路由到该队列上。-->
+    <!--Headers: 如果消息参数表中的头信息和值都与binding参数表中相匹配, 消息将会路由到该队列上。-->
+    <!--Fanout: 不管消息的routing key和参数表的头信息/值是什么, 消息将会路由到该队列上。-->
+    <direct-exchange name="user.alert.email.exchange" durable="true">
+        <bindings>
+            <binding queue="user.alerts.email" />     <!--默认的routing key与队列的名称相同-->
+        </bindings>
+    </direct-exchange>
+
+    <!--3、配置RabbitTemplate发送消息-->
+    <template id="rabbitTemplate"
+              connection-factory="connectionFactory" />
+
+    <!--4、配置监听器容器和监听器来接收消息-->
+    <beans:bean id="userListener" class="com.everseeker.action.UserAlertHandler" />
+    <!--concurrency: 初始化监听器容器时, 并发消费者的数目.-->
+    <!--max-concurrency: 并发消费者的最大数目.-->
+    <!--prefetch: 一次最多可以发送给同一个消费者的消息数目.-->
+    <listener-container connection-factory="connectionFactory" acknowledge="auto" prefetch="2" concurrency="2" max-concurrency="5">
+        <listener ref="userListener"
+                  method="sendEmailToUserHandler"
+                  queues="userAlertEmailQueue" />
+    </listener-container>
+
+</beans:beans>
