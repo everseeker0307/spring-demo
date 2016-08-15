@@ -31,4 +31,9 @@ public class UserServiceTest {
         User user = userService.getUserByUsername("abc");
         System.out.println(user);
     }
+
+    @Test
+    public void checkUserTest() {
+        System.out.println("\ncheckUserTest: " + userService.checkUser("www", "9876") + "\n");
+    }
 }

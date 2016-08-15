@@ -1,5 +1,8 @@
 package com.everseeker.entity;
 
+import com.everseeker.tools.validator.DataValidator;
+import com.everseeker.tools.validator.RegexType;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -9,10 +12,18 @@ import java.util.UUID;
  */
 public class User implements Serializable {
     private String id;
+
+    @DataValidator(max = 16, notEmpty = true)
     private String username;
+
+    @DataValidator(min = 6)
     private String password;
+
+    @DataValidator(type = RegexType.EMAIL)
     private String email;
+
     private long regDate;
+
     private int state;
 
     public User() {

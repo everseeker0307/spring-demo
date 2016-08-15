@@ -1,5 +1,6 @@
 package com.everseeker.config;
 
+import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
@@ -17,6 +18,7 @@ public class ApplicationConfig extends ResourceConfig {
     public ApplicationConfig() {
         packages("com.everseeker.action");
         register(JacksonFeature.class);
+        register(JacksonJsonProvider.class);
         register(CORSFilter.class);
         property(ServerProperties.METAINF_SERVICES_LOOKUP_DISABLE, true);
     }
