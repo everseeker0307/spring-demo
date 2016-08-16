@@ -21,8 +21,7 @@ public class ValidateService {
             field.setAccessible(true);
             try {
                 validate(field, object);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+            } catch (ValidatorException e) {
                 map.put(field.getName(), e.getMessage());
             }
             field.setAccessible(false);
@@ -31,51 +30,55 @@ public class ValidateService {
         return map.isEmpty() ? null : map;
     }
 
-    public static void validate(Field field, Object object) throws Exception {
+    public static void validate(Field field, Object object) throws ValidatorException {
         //获取对象的字段的注解信息
         DataValidator dv = field.getAnnotation(DataValidator.class);
         if (dv == null)
             return;
 
         //获得字段的值
-        Object value = field.get(object);
+        Object value = null;
+        try {
+            value = field.get(object);
+        } catch (IllegalAccessException e) {
+            System.out.println("Illegal");
+            e.printStackTrace();
+        }
         String msg = dv.msg().equals("") ? field.getName() : dv.msg();
 
         //开始解析
-        if (!dv.notNull()) {
-            if (value == null) {
-                throw new Exception(msg + "不能为空");
-            }
+        if (value == null) {
+            throw new ValidatorException(msg + "不能为空");
         }
 
         if (value.toString().length() > dv.max() && dv.max() != 0) {
-            throw new Exception(msg + "长度不能超过" + dv.max());
+            throw new ValidatorException(msg + "长度不能超过" + dv.max());
         }
 
         if (value.toString().length() < dv.min() && dv.min() != 0) {
-            throw new Exception(msg + "长度不能小于" + dv.min());
+            throw new ValidatorException(msg + "长度不能小于" + dv.min());
         }
 
         if (dv.type() != RegexType.NONE) {
             switch (dv.type()) {
                 case EMAIL:
                     if (!RegexUtils.isEmail(value.toString())) {
-                        throw new Exception(msg + "格式不正确");
+                        throw new ValidatorException(msg + "格式不正确");
                     }
                     break;
                 case IP:
                     if (!RegexUtils.isIp(value.toString())) {
-                        throw new Exception(msg + "地址格式不正确");
+                        throw new ValidatorException(msg + "地址格式不正确");
                     }
                     break;
                 case DIGITS:
                     if (!RegexUtils.isDigits(value.toString())) {
-                        throw new Exception(msg + "不是数字");
+                        throw new ValidatorException(msg + "不是数字");
                     }
                     break;
                 case PHONE:
                     if (!RegexUtils.isPhone(value.toString())) {
-                        throw new Exception(msg + "手机号码不正确");
+                        throw new ValidatorException(msg + "手机号码不正确");
                     }
                     break;
                 default:

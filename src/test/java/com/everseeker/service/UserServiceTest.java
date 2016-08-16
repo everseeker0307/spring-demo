@@ -2,6 +2,7 @@ package com.everseeker.service;
 
 import com.everseeker.config.RootConfig;
 import com.everseeker.entity.User;
+import com.everseeker.exception.UserException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void checkUserTest() {
+    public void checkUserTest() throws UserException {
         System.out.println("\ncheckUserTest: " + userService.checkUser("www", "9876") + "\n");
     }
 }

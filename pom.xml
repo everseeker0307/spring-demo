@@ -14,10 +14,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>4.3.1.RELEASE</spring.version>
         <slf4j.version>1.7.21</slf4j.version>
+        <jackson.version>1.9.13</jackson.version>
+        <jersey.version>2.22.2</jersey.version>
     </properties>
 
     <dependencies>
-
         <!--spring-->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -123,11 +124,6 @@
             <artifactId>jersey-json</artifactId>
             <version>1.19.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20160810</version>
-        </dependency>
         <!--slf4j-->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -162,4 +158,5 @@
             <version>1.4.7</version>
         </dependency>
     </dependencies>
+    
 </project>

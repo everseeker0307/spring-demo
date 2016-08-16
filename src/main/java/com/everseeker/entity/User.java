@@ -2,7 +2,6 @@ package com.everseeker.entity;
 
 import com.everseeker.tools.validator.DataValidator;
 import com.everseeker.tools.validator.RegexType;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
