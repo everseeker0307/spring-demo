@@ -1,6 +1,7 @@
 package com.everseeker.action;
 
 import com.everseeker.config.IOC;
+import com.everseeker.entity.ConfirmEmail;
 import com.everseeker.entity.Rest;
 import com.everseeker.entity.ValidatorRest;
 import com.everseeker.entity.User;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +48,9 @@ public class UserAction {
         if (error == null) {
             try {
                 userService.addUser(user);
+                //3. 发送确认邮件
+                ConfirmEmail confirmEmail = new ConfirmEmail(user);
+                userAlertService.sendEmailToUserQueue(confirmEmail);
             } catch (Exception e) {
                 error = new HashMap<String, String>();
                 error.put("username", "用户名已被占用!");
@@ -53,14 +59,34 @@ public class UserAction {
             }
         }
         result.setError(error);
+        result.setData(userService.getUserByUsername(user.getUsername()));
         return result;
     }
+
+//    @POST
+//    @Path("/login")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Rest<User> checkUser(User user) {
+//        Rest<User> rest = new Rest<User>();
+//        try {
+//            User ruser = userService.checkUser(user.getUsername(), user.getPassword());
+//            rest.setStatus(UserStatus.OK.getStatus());
+//            rest.setMsg(UserStatus.OK.getMsg());
+//            rest.setData(ruser);
+//        } catch (UserException e) {
+//            rest.setStatus(e.getStatus());
+//            rest.setMsg(e.getMsg());
+//        }
+//
+//        return rest;
+//    }
 
     @POST
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Rest<User> checkUser(User user) {
+    public Response checkUser(User user) {
         Rest<User> rest = new Rest<User>();
         try {
             User ruser = userService.checkUser(user.getUsername(), user.getPassword());
@@ -71,7 +97,9 @@ public class UserAction {
             rest.setStatus(e.getStatus());
             rest.setMsg(e.getMsg());
         }
-
-        return rest;
+        return Response.ok()
+                       .cookie(new NewCookie("sid", "abcd1234xyz"))
+                       .entity(rest)
+                       .build();
     }
 }

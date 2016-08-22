@@ -3,6 +3,7 @@ package com.everseeker.config;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
@@ -16,8 +17,8 @@ import java.util.Properties;
 @PropertySource("classpath:mail.properties")
 public class RootConfig {
 
-    @Bean
-    public MailSender mailSender(Environment env) {
+    @Bean(name = "mailSender")
+    public JavaMailSender mailSender(Environment env) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         //如果为普通邮箱, 非ssl认证等, 比如163邮箱
         mailSender.setHost(env.getProperty("mailserver.host"));

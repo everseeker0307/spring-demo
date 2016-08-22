@@ -23,7 +23,7 @@ public class UserServiceTest {
     @Test
     @Rollback   //注: @Roolback是针对事务的, 对非事务性方法不起作用
     public void addUserTest() {
-        User user = new User("www", "987", "www@189.cn");
+        User user = new User("wwww", "987", "www@189.cn");
         userService.addUser(user);
     }
 

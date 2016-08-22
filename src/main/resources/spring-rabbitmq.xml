@@ -37,7 +37,7 @@
               connection-factory="connectionFactory" />
 
     <!--4、配置监听器容器和监听器来接收消息-->
-    <beans:bean id="userListener" class="com.everseeker.action.UserAlertHandler" />
+    <beans:bean id="userListener" class="com.everseeker.service.handler.UserAlertHandler" />
     <!--concurrency: 初始化监听器容器时, 并发消费者的数目.-->
     <!--max-concurrency: 并发消费者的最大数目.-->
     <!--prefetch: 一次最多可以发送给同一个消费者的消息数目.-->

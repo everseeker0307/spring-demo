@@ -1,6 +1,7 @@
 package com.everseeker.service;
 
 import com.everseeker.config.RootConfig;
+import com.everseeker.entity.ConfirmEmail;
 import com.everseeker.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,7 @@ public class UserAlertServiceTest {
 
     @Test
     public void sendEmailToUserTest() {
-        User user = new User("aqq", "88991234", "wuhao@ctyun.cn");
-        userAlertService.sendEmailToUserQueue(user);
+        ConfirmEmail confirmEmail = new ConfirmEmail(new User("aqq", "88991234", "wuhao@ctyun.cn"));
+        userAlertService.sendEmailToUserQueue(confirmEmail);
     }
 }
