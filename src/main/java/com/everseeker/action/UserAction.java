@@ -63,33 +63,26 @@ public class UserAction {
         return result;
     }
 
-//    @POST
-//    @Path("/login")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Rest<User> checkUser(User user) {
-//        Rest<User> rest = new Rest<User>();
-//        try {
-//            User ruser = userService.checkUser(user.getUsername(), user.getPassword());
-//            rest.setStatus(UserStatus.OK.getStatus());
-//            rest.setMsg(UserStatus.OK.getMsg());
-//            rest.setData(ruser);
-//        } catch (UserException e) {
-//            rest.setStatus(e.getStatus());
-//            rest.setMsg(e.getMsg());
-//        }
-//
-//        return rest;
-//    }
-
+    /**
+     * 用户登录.
+     * 1、帐号密码正确, 返回user信息;
+     * 2、帐号或者密码错, 返回错误提示;
+     * 3、如果用户勾选了"记住我", 那么需要设置cookie.
+     *
+     * @param username
+     * @param password
+     * @param agreement
+     * @return
+     */
     @POST
     @Path("/login")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response checkUser(User user) {
+    public Response login(@FormParam("username") String username, @FormParam("password") String password,
+                              @FormParam("agreement") boolean agreement) {
         Rest<User> rest = new Rest<User>();
         try {
-            User ruser = userService.checkUser(user.getUsername(), user.getPassword());
+            User ruser = userService.checkUser(username, password);
             rest.setStatus(UserStatus.OK.getStatus());
             rest.setMsg(UserStatus.OK.getMsg());
             rest.setData(ruser);
@@ -97,9 +90,11 @@ public class UserAction {
             rest.setStatus(e.getStatus());
             rest.setMsg(e.getMsg());
         }
-        return Response.ok()
-                       .cookie(new NewCookie("sid", "abcd1234xyz"))
-                       .entity(rest)
-                       .build();
+
+        if (agreement) {
+            return Response.ok().cookie(new NewCookie("sid", username)).entity(rest).build();
+        }
+
+        return Response.ok().entity(rest).build();
     }
 }
