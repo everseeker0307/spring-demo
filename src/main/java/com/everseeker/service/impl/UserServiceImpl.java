@@ -9,10 +9,12 @@ import com.everseeker.tools.validator.ValidateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.UUID;
 
 
 /**
@@ -35,7 +37,8 @@ public class UserServiceImpl implements UserService {
         return userDao.getUserByUsername(username);
     }
 
-    public User checkUser(String username, String password) throws UserException {
+    //
+    public User login(String username, String password) throws UserException {
         log.info("Login start: username={}", username);
         User user = userDao.getUserByUsername(username);
         if (user == null) {

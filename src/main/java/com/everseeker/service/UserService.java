@@ -16,7 +16,7 @@ public interface UserService {
     User getUserByUsername(String username);
 
     //核对用户登录是否成功, 如果用户名和密码都匹配, 返回查询到的用户; 否则返回null
-    User checkUser(String username, String password) throws UserException;
+    User login(String username, String password) throws UserException;
 
     //核对用户输入
     Map<String, String> checkUserValidator(User user);

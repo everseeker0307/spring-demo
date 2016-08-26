@@ -11,13 +11,14 @@ import com.everseeker.service.UserAlertService;
 import com.everseeker.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by everseeker on 16/8/8.
@@ -27,6 +28,8 @@ public class UserAction {
     private static Logger log = LoggerFactory.getLogger(UserAction.class);
     private UserService userService = (UserService) IOC.getBean("userService");
     private UserAlertService userAlertService = (UserAlertService) IOC.getBean("userAlertService");
+    private RedisTemplate<String, Object> redisTemplate = (RedisTemplate<String, Object>) IOC.getBean("redisTemplate");
+    private StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) IOC.getBean("stringRedisTemplate");
 
     @GET
     @Path("{username}")
@@ -81,8 +84,9 @@ public class UserAction {
     public Response login(@FormParam("username") String username, @FormParam("password") String password,
                               @FormParam("agreement") boolean agreement) {
         Rest<User> rest = new Rest<User>();
+        User ruser = null;
         try {
-            User ruser = userService.checkUser(username, password);
+            ruser = userService.login(username, password);
             rest.setStatus(UserStatus.OK.getStatus());
             rest.setMsg(UserStatus.OK.getMsg());
             rest.setData(ruser);
@@ -91,10 +95,46 @@ public class UserAction {
             rest.setMsg(e.getMsg());
         }
 
-        if (agreement) {
-            return Response.ok().cookie(new NewCookie("sid", username)).entity(rest).build();
+        if (agreement && ruser != null) {
+            //如果之前存在sid, 首先删除原先记录
+            String oldSid = stringRedisTemplate.opsForValue().get(username);
+            if (oldSid != null && redisTemplate.hasKey(oldSid)) {
+                redisTemplate.delete(oldSid);
+            }
+            //之后设置新的sid
+            String sid = UUID.randomUUID().toString().replace("-", "");
+            redisTemplate.opsForValue().set(sid, ruser);
+            stringRedisTemplate.opsForValue().set(username, sid);
+            return Response.ok().cookie(new NewCookie("sid", sid)).entity(rest).build();
         }
 
         return Response.ok().entity(rest).build();
+    }
+
+    /**
+     * public boolean index(@Context HttpHeaders hh) {
+     *      Map<String, Cookie> cookies = hh.getCookies();
+     *      for(Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+     *        System.out.println(entry.getKey() + ":  " + entry.getValue());
+     *      }
+     *
+     *
+     */
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public boolean isIndex(@CookieParam("sid") Cookie cookie) {
+        if (cookie != null && redisTemplate.hasKey(cookie.getValue())) {
+            return true;
+        }
+        return false;
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public User index(@CookieParam("sid") Cookie cookie) {
+        if (cookie != null && redisTemplate.hasKey(cookie.getValue())) {
+            return (User)redisTemplate.opsForValue().get(cookie.getValue());
+        }
+        return null;
     }
 }

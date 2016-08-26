@@ -13,3 +13,5 @@
 ####jersey
 
 ####javax.mail
+
+####redis

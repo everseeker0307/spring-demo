@@ -35,6 +35,6 @@ public class UserServiceTest {
 
     @Test
     public void checkUserTest() throws UserException {
-        System.out.println("\ncheckUserTest: " + userService.checkUser("www", "9876") + "\n");
+        System.out.println("\ncheckUserTest: " + userService.login("www", "9876") + "\n");
     }
 }
