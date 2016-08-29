@@ -1,7 +1,10 @@
 package com.everseeker.config;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,6 +22,7 @@ import java.util.Properties;
  * Created by everseeker on 16/8/7.
  */
 @Configuration
+@EnableCaching
 @ComponentScan(basePackages = {"com.everseeker"})
 @ImportResource({"classpath:spring-mybatis.xml", "classpath:spring-rabbitmq.xml"})
 @PropertySource("classpath:mail.properties")
@@ -58,6 +62,7 @@ public class RootConfig {
         JedisConnectionFactory cf = new JedisConnectionFactory();
         cf.setHostName("127.0.0.1");
         cf.setPort(6379);
+        cf.afterPropertiesSet();
         return cf;
     }
 
@@ -76,8 +81,9 @@ public class RootConfig {
          * 2. 也可以设置为其他方式序列化. 比如以下代码设置value为通过jackson2json序列化, 在redis客户端可以直观查看, 同时, 通过get(sid)获得的
          *      对象为json对象, 对应Java中的数据结构为java.util.LinkedHashMap.
          */
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
+//        redisTemplate.setKeySerializer(new StringRedisSerializer());
 //        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<Object>(Object.class));
+        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
 
@@ -86,8 +92,18 @@ public class RootConfig {
      * @param cf
      * @return
      */
-    @Bean(name = "stringRedisTemplate")
-    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory cf) {
-        return new StringRedisTemplate(cf);
+//    @Bean(name = "stringRedisTemplate")
+//    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory cf) {
+//        return new StringRedisTemplate(cf);
+//    }
+
+    /**
+     * CacheManager
+     * @param redisTemplate
+     * @return
+     */
+    @Bean
+    public CacheManager cacheManager(RedisTemplate redisTemplate) {
+        return new RedisCacheManager(redisTemplate);
     }
 }

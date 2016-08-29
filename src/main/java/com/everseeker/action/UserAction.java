@@ -11,8 +11,6 @@ import com.everseeker.service.UserAlertService;
 import com.everseeker.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -28,8 +26,6 @@ public class UserAction {
     private static Logger log = LoggerFactory.getLogger(UserAction.class);
     private UserService userService = (UserService) IOC.getBean("userService");
     private UserAlertService userAlertService = (UserAlertService) IOC.getBean("userAlertService");
-    private RedisTemplate<String, Object> redisTemplate = (RedisTemplate<String, Object>) IOC.getBean("redisTemplate");
-    private StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) IOC.getBean("stringRedisTemplate");
 
     @GET
     @Path("{username}")
@@ -97,14 +93,11 @@ public class UserAction {
 
         if (agreement && ruser != null) {
             //如果之前存在sid, 首先删除原先记录
-            String oldSid = stringRedisTemplate.opsForValue().get(username);
-            if (oldSid != null && redisTemplate.hasKey(oldSid)) {
-                redisTemplate.delete(oldSid);
-            }
+            userService.removeUserCacheBySessionId(userService.getSessionIdCacheByUsername(username));
             //之后设置新的sid
             String sid = UUID.randomUUID().toString().replace("-", "");
-            redisTemplate.opsForValue().set(sid, ruser);
-            stringRedisTemplate.opsForValue().set(username, sid);
+            userService.setCache(sid, ruser);
+            userService.setCache(username, sid);
             return Response.ok().cookie(new NewCookie("sid", sid)).entity(rest).build();
         }
 
@@ -121,19 +114,10 @@ public class UserAction {
      *
      */
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public boolean isIndex(@CookieParam("sid") Cookie cookie) {
-        if (cookie != null && redisTemplate.hasKey(cookie.getValue())) {
-            return true;
-        }
-        return false;
-    }
-
-    @POST
     @Produces(MediaType.APPLICATION_JSON)
     public User index(@CookieParam("sid") Cookie cookie) {
-        if (cookie != null && redisTemplate.hasKey(cookie.getValue())) {
-            return (User)redisTemplate.opsForValue().get(cookie.getValue());
+        if (cookie != null) {
+            return userService.getUserCacheBySessionId(cookie.getValue());
         }
         return null;
     }

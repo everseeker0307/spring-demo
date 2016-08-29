@@ -2,6 +2,8 @@ package com.everseeker.service;
 
 import com.everseeker.entity.User;
 import com.everseeker.exception.UserException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.Map;
 
@@ -20,4 +22,22 @@ public interface UserService {
 
     //核对用户输入
     Map<String, String> checkUserValidator(User user);
+
+    //根据sessionid查找用户, 如果在缓存中找到, 直接返回user; 否则返回null
+    @Cacheable("sidCache")
+    User getUserCacheBySessionId(String sid);
+
+    //根据username查找sessionId, 如果在缓存中找到, 直接返回sid; 否则返回null
+    @Cacheable("usernameCache")
+    String getSessionIdCacheByUsername(String username);
+
+    //删除key为sid的缓存
+    @CacheEvict("sidCache")
+    void removeUserCacheBySessionId(String sid);
+
+    //设置缓存, hash格式
+//    void setCache(String key, String subkey, Object value);
+
+    //设置缓存, String格式
+    void setCache(String key, Object value);
 }

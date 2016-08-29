@@ -9,6 +9,8 @@ import com.everseeker.tools.validator.ValidateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
     public void addUser(User user) {
         log.info("Add user start: username={}", user.getUsername());
         userDao.addUser(user);
@@ -37,7 +42,6 @@ public class UserServiceImpl implements UserService {
         return userDao.getUserByUsername(username);
     }
 
-    //
     public User login(String username, String password) throws UserException {
         log.info("Login start: username={}", username);
         User user = userDao.getUserByUsername(username);
@@ -56,5 +60,19 @@ public class UserServiceImpl implements UserService {
 
     public Map<String, String> checkUserValidator(User user) {
         return ValidateService.valid(user);
+    }
+
+    public User getUserCacheBySessionId(String sid) {
+        return null;
+    }
+
+    public String getSessionIdCacheByUsername(String username) {
+        return null;
+    }
+
+    public void removeUserCacheBySessionId(String sid) {}
+
+    public void setCache(String key, Object value) {
+        redisTemplate.opsForValue().set(key, value);
     }
 }
