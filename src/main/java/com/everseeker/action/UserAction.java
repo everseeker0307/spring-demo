@@ -9,6 +9,7 @@ import com.everseeker.exception.UserException;
 import com.everseeker.exception.UserStatus;
 import com.everseeker.service.UserAlertService;
 import com.everseeker.service.UserService;
+import com.everseeker.tools.encrypt.Encrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class UserAction {
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ValidatorRest addUser(User user) {
+    public Response addUser(User user) {
         ValidatorRest result = new ValidatorRest();
         //1. 先校验用户输入是否符合要求
         Map<String, String> error = userService.checkUserValidator(user);
@@ -46,6 +47,7 @@ public class UserAction {
         //2. 如果符合要求, 注册用户
         if (error == null) {
             try {
+                user.setPassword(Encrypt.encrypt(user.getUsername(), user.getPassword()));
                 userService.addUser(user);
                 //3. 发送确认邮件
                 ConfirmEmail confirmEmail = new ConfirmEmail(user);
@@ -58,8 +60,16 @@ public class UserAction {
             }
         }
         result.setError(error);
-        result.setData(userService.getUserByUsername(user.getUsername()));
-        return result;
+        result.setData(user);
+
+        if (error == null) {
+            String sid = UUID.randomUUID().toString().replace("-", "");
+            userService.setCache(sid, user);
+            userService.setCache(user.getUsername(), sid);
+            return Response.ok().cookie(new NewCookie("sid", sid)).entity(result).build();
+        }
+
+        return Response.status(Response.Status.CONFLICT).entity(result).build();
     }
 
     /**
@@ -81,8 +91,9 @@ public class UserAction {
                               @FormParam("agreement") boolean agreement) {
         Rest<User> rest = new Rest<User>();
         User ruser = null;
+        String newpassword = Encrypt.encrypt(username, password);
         try {
-            ruser = userService.login(username, password);
+            ruser = userService.login(username, newpassword);
             rest.setStatus(UserStatus.OK.getStatus());
             rest.setMsg(UserStatus.OK.getMsg());
             rest.setData(ruser);
