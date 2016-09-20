@@ -16,9 +16,9 @@
 
 ######redis(缓存)
 
-配合[ant-design-demo](https://github.com/everseeker0307/ant-design-demo)一起使用, 
-ant-design-demo负责前端界面, 
-spring-demo负责后端, 前后端完全分离, 通过rest通信。
+配合[express-webpack-react](https://github.com/everseeker0307/express-webpack-react)一起使用, 
+express-webpack-react负责前端界面。
+spring-demo负责后端, 前后端完全分离, 通过rest通信。项目运行前,开启mysql、rabbitmq以及redis服务。
 
 项目基本流程如下:
 >   1、 用户注册(帐号,密码,邮箱), 前端负责对输入的有效性校验, 之后通过rest发送给后端处理。  
